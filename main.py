@@ -1,10 +1,10 @@
 from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from models import create_invoices_table, get_invoices_by_client_id
+from models import create_invoices_table, get_invoices_by_client_id ,get_invoices_by_client_name
 from routers import upload_routes
 
 app = FastAPI(
-    title="Da3em Invoice AI API",
+    title="Invoice AI API",
     description="API لتحليل الفواتير باستخدام الذكاء الصناعي وتسجيلها في قاعدة البيانات",
     version="1.0"
 )
@@ -24,6 +24,15 @@ def get_invoices_by_client(client_id: int):
     invoices = get_invoices_by_client_id(client_id)
     if not invoices:
         raise HTTPException(status_code=404, detail="No invoices found for this client")
+    return {"status": "success", "total": len(invoices), "data": invoices}
+
+app.include_router(router)
+
+@router.get("/client/name/{client_name}")
+def get_invoices_by_client_name_route(client_name: str):
+    invoices = get_invoices_by_client_name(client_name)
+    if not invoices:
+        raise HTTPException(status_code=404, detail="No invoices found for this client name")
     return {"status": "success", "total": len(invoices), "data": invoices}
 
 app.include_router(router)

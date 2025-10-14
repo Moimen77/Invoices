@@ -110,3 +110,17 @@ def get_invoices_by_client_id(client_id):
     conn.close()
 
     return invoices
+
+
+def get_invoices_by_client_name(client_name: str):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT * FROM invoices 
+        WHERE client_name = %s
+        ORDER BY id DESC
+    """, (client_name,))
+    invoices = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return invoices
