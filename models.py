@@ -7,7 +7,6 @@ def create_invoices_table():
         CREATE TABLE IF NOT EXISTS invoices (
             id INT AUTO_INCREMENT PRIMARY KEY,
             client_id INT,
-            client_name VARCHAR(255),
             supplier_name VARCHAR(255),
             invoice_number VARCHAR(100),
             issue_date VARCHAR(50),
