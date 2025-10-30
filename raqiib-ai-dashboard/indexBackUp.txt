@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 رفع وتحليل الفواتير | Raqiib AI</title>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f6fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #3f51b5;
+            color: white;
+            padding: 18px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+            background-color: #fafafa;
+        }
+
+        select:focus,
+        input[type="file"]:focus {
+            border-color: #3f51b5;
+            outline: none;
+        }
+
+        button {
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #2c3e9d;
+        }
+
+        .results {
+            margin-top: 30px;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            color: #333;
+        }
+
+        .card img {
+            width: 120px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .status-success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: red;
+            font-weight: bold;
+        }
+
+        .loading {
+            color: #555;
+            text-align: center;
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>📊 نظام تحليل الفواتير - Raqiib AI</header>
+
+    <div class="container">
+        <div class="input-group">
+            <label>اختيار العميل</label>
+            <select id="client_select">
+                <option value="">جارِ تحميل العملاء...</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>اختر الفواتير (PDF أو صور)</label>
+            <input type="file" id="invoice_files" multiple accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+        <button id="upload_btn" type="button">📤 رفع وتحليل الفواتير</button>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const clientSelect = document.getElementById("client_select");
+        const resultsContainer = document.getElementById("results");
+
+        // 🟢 جلب قائمة العملاء عند تحميل الصفحة
+        async function loadClients() {
+            const select = document.getElementById("client_select");
+            select.innerHTML = "<option disabled selected>⏳ جاري تحميل العملاء...</option>";
+
+            try {
+                const response = await fetch("http://localhost:8000/invoices/get_clients");
+                const text = await response.text(); // ← ناخد النص الخام
+                console.log("Raw Response:", text); // ← نطبعه في الـ Console
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    throw new Error("الاستجابة ليست JSON صالح");
+                }
+
+                if (!data.data || !Array.isArray(data.data)) {
+                    console.log("Response structure:", data);
+                    throw new Error("استجابة غير متوقعة من السيرفر");
+                }
+
+                select.innerHTML = '<option disabled selected>اختر العميل</option>';
+                data.data.forEach(client => {
+                    const option = document.createElement("option");
+                    option.value = client.client_id;
+                    option.textContent = client.client_name;
+                    select.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("❌ خطأ أثناء تحميل القائمة:", error);
+                select.innerHTML = `<option disabled selected>❌ خطأ أثناء تحميل القائمة</option>`;
+                alert("حدث خطأ أثناء تحميل قائمة العملاء");
+            }
+        }
+
+
+
+        loadClients();
+
+
+        // 🟢 رفع الملفات
+        document.getElementById("upload_btn").addEventListener("click", async (event) => {
+            event.preventDefault(); // ⛔ يمنع أي refresh
+            console.log("📤 الزر اتضغط فعلاً بدون Refresh");
+
+            const clientId = clientSelect.value;
+            const files = document.getElementById("invoice_files").files;
+
+            if (!clientId || files.length === 0) {
+                alert("⚠️ من فضلك اختر عميلًا واختر ملفات قبل الرفع.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("client_id", clientId);
+            for (let file of files) {
+                formData.append("files", file);
+            }
+
+            resultsContainer.innerHTML = '<p class="loading">⏳ جاري رفع الملفات وتحليلها...</p>';
+
+            try {
+                const response = await fetch("http://localhost:8000/upload/invoices/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("حدث خطأ في الاتصال بالسيرفر");
+
+                const data = await response.json();
+                resultsContainer.innerHTML = "";
+
+                data.processed.forEach(item => {
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                <h3>${item.file}</h3>
+                <p class="${item.status.includes('✅') || item.status.includes('Done') ? 'status-success' : 'status-error'}">
+                    ${item.status}
+                </p>
+                ${item.image_url ? `<img src="${item.image_url}" alt="فاتورة">` : ""}
+                ${item.products ? `<p><strong>عدد المنتجات:</strong> ${item.products}</p>` : ""}
+                ${item.error ? `<p style="color:red;">❌ خطأ: ${item.error}</p>` : ""}
+            `;
+                    resultsContainer.appendChild(card);
+                });
+
+            } catch (err) {
+                resultsContainer.innerHTML = `<p style="color:red;">❌ ${err.message}</p>`;
+            }
+        });
+    </script>
+</body>
+
+</html>

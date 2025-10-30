@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نظام إدارة الفواتير رقيب</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Cairo", sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f6f8fa;
+            color: #333;
+        }
+
+        /* === Sidebar === */
+        .sidebar {
+            width: 250px;
+            background-color: #1e293b;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+            transition: 0.3s;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            color: #cbd5e1;
+            text-decoration: none;
+            display: block;
+            transition: 0.2s;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #334155;
+            color: #fff;
+        }
+
+        /* === Main Content === */
+        .main {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        .header {
+            background-color: #fff;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            min-height: 70vh;
+        }
+
+        /* Loading text */
+        .loading {
+            color: #555;
+            text-align: center;
+        }
+
+        /* Card design for invoices */
+        .card {
+            background-color: #f9fafb;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-success {
+            color: green;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 🧭 Sidebar -->
+    <div class="sidebar">
+        <h2>📊 رقيب أدخالات الذكاء الأصطناعي</h2>
+        <a href="#" class="active" onclick="showSection('invoices')">📄 الفواتير</a>
+        <a href="#" onclick="showSection('clients')">👥 العملاء</a>
+        <a href="#" onclick="showSection('stock')">📦 المخزون</a>
+    </div>
+
+    <!-- 🧩 Main Content -->
+    <div class="main">
+        <div class="header">
+            <h3 id="section-title">📄 الفواتير</h3>
+            <button
+                style="padding:8px 16px;border:none;border-radius:8px;background-color:#1d4ed8;color:#fff;cursor:pointer;">
+                تحديث 🔄
+            </button>
+        </div>
+
+        <div class="content" id="content-area">
+            <!-- سيتم تحميل المحتوى هنا -->
+            <p>مرحبًا بك في نظام داعم — اختر قسمًا من القائمة لبدء العمل.</p>
+        </div>
+    </div>
+
+    <script>
+        // 🧭 التحكم في عرض الصفحات
+        function showSection(section) {
+            document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
+            event.target.classList.add("active");
+
+            const content = document.getElementById("content-area");
+            const title = document.getElementById("section-title");
+
+            if (section === "invoices") {
+                title.innerText = "📄 الفواتير";
+                content.innerHTML = `
+          <h4>📤 رفع الفواتير</h4>
+          <label>اختر عميل:</label>
+          <select id="clientSelect"></select>
+          <br><br>
+          <input type="file" id="invoice_files" multiple />
+          <br><br>
+          <button id="upload_btn" type="button" onclick="uploadInvoices()">رفع وتحليل الفواتير</button>
+          <div id="results"></div>
+        `;
+                loadClients();
+            }
+
+            if (section === "clients") {
+                title.innerText = "👥 العملاء";
+                content.innerHTML = `<p>📋 قائمة العملاء ستظهر هنا لاحقًا...</p>`;
+            }
+
+            if (section === "stock") {
+                title.innerText = "📦 مواد المخزون";
+                content.innerHTML = `<p>🧱 سيتم إضافة إدارة المخزون قريبًا.</p>`;
+            }
+        }
+
+        // 🧾 تحميل العملاء
+        // 🧾 تحميل العملاء
+        async function loadClients() {
+            const select = document.getElementById("clientSelect");
+            select.innerHTML = "<option>⏳ جاري تحميل...</option>";
+
+            try {
+                const res = await fetch("http://localhost:8000/clients/get_clients");
+                const result = await res.json();
+
+                // تأكد إن الاستجابة صحيحة
+                if (!result.data || !Array.isArray(result.data)) {
+                    throw new Error("البيانات غير صالحة");
+                }
+
+                select.innerHTML = "<option value='' disabled selected>اختر عميلًا</option>";
+
+                result.data.forEach(client => {
+                    const opt = document.createElement("option");
+                    opt.value = client.client_id;
+                    opt.textContent = client.client_name;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                console.error("❌ خطأ أثناء تحميل القائمة:", e);
+                select.innerHTML = "<option>❌ خطأ أثناء تحميل قائمة العملاء</option>";
+            }
+        }
+
+
+        // 📤 رفع الفواتير
+        async function uploadInvoices() {
+            const clientId = document.getElementById("clientSelect").value;
+            const files = document.getElementById("invoice_files").files;
+            const results = document.getElementById("results");
+
+            if (!clientId || files.length === 0) {
+                alert("⚠️ اختر عميلًا وملفات قبل الرفع.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("client_id", clientId);
+            for (let f of files) formData.append("files", f);
+
+            results.innerHTML = '<p class="loading">⏳ جاري رفع الملفات...</p>';
+
+            try {
+                const res = await fetch("http://localhost:8000/upload/invoices/", {
+                    method: "POST",
+                    body: formData,
+                });
+                const data = await res.json();
+                results.innerHTML = "";
+
+                data.processed.forEach(item => {
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.innerHTML = `
+            <h4>${item.file}</h4>
+            <p class="${item.status.includes('✅') ? 'status-success' : 'status-error'}">${item.status}</p>
+            ${item.error ? `<p>❌ ${item.error}</p>` : ""}
+          `;
+                    results.appendChild(div);
+                });
+            } catch (err) {
+                results.innerHTML = `<p class="status-error">❌ فشل الاتصال بالسيرفر</p>`;
+            }
+        }
+
+        // ✅ افتراضيًا نعرض قسم الفواتير
+        showSection('invoices');
+    </script>
+</body>
+
+</html>

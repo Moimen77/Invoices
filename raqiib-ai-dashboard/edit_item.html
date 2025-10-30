@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <title>✏️ تعديل الصنف</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            direction: rtl;
+            background: #f5f5f5;
+            padding: 30px;
+        }
+
+        form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 15px;
+            width: 100%;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h2 style="text-align:center;">✏️ تعديل بيانات الصنف</h2>
+
+    <form id="editForm">
+        <label>اسم المنتج:</label>
+        <input type="text" id="product_name" required>
+
+        <label>المخزون المطابق:</label>
+        <select id="matched_inventory">
+            <option value="">جارٍ تحميل...</option>
+        </select>
+
+        <label>الكمية:</label>
+        <input type="number" id="quantity" step="any">
+
+        <label>سعر الوحدة:</label>
+        <input type="number" id="unit_price" step="any">
+
+        <label>التصنيف:</label>
+        <input type="text" id="category">
+
+        <button type="submit">💾 حفظ التعديلات</button>
+    </form>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+        const params = new URLSearchParams(window.location.search);
+        const invoiceId = params.get("invoice_id");
+        const itemId = params.get("item_id");
+        console.log(invoiceId, itemId);
+
+        const form = document.getElementById("editForm");
+        const matchedInventorySelect = document.getElementById("matched_inventory");
+
+        let clientId = null;
+
+        // 🟢 تحميل بيانات الفاتورة والصنف معًا
+        async function loadItemData() {
+            try {
+                const res = await fetch(`${API_BASE}/invoices/${invoiceId}`);
+                const data = await res.json();
+
+                if (data.status !== "success" || !data.data) {
+                    alert("❌ لم يتم العثور على بيانات الفاتورة");
+                    return;
+                }
+
+                const invoice = data.data;
+                clientId = invoice.client_id;
+                const item = invoice.items.find(it => String(it.id) === String(itemId));
+
+                if (!item) {
+                    alert("⚠️ لم يتم العثور على هذا الصنف");
+                    return;
+                }
+
+                // ✅ تعبئة البيانات في الفورم
+                document.getElementById("product_name").value = item.product_name || "";
+                document.getElementById("quantity").value = item.quantity || "";
+                document.getElementById("unit_price").value = item.unit_price || "";
+                document.getElementById("category").value = item.category || "";
+
+                // 🧾 تحميل بيانات المخزون الخاصة بالعميل
+                await loadInventories(item.matched_inventory);
+
+            } catch (err) {
+                console.error("Error loading item data:", err);
+                alert("⚠️ حدث خطأ أثناء تحميل بيانات الصنف");
+            }
+        }
+
+        // 🟢 تحميل قائمة المخزون بناءً على client_id
+        async function loadInventories(selectedValue = "") {
+            if (!clientId) return;
+            try {
+                const res = await fetch(`${API_BASE}/invoices/inventory/client/${clientId}`);
+                const data = await res.json();
+
+                if (data.status === "success" && Array.isArray(data.data)) {
+                    matchedInventorySelect.innerHTML =
+                        `<option value="">اختر المخزون المطابق</option>` +
+                        data.data.map(i => `
+              <option value="${i.item_name}">${i.item_name}</option>
+            `).join("");
+
+                    if (selectedValue) {
+                        matchedInventorySelect.value = selectedValue;
+                    }
+                } else {
+                    matchedInventorySelect.innerHTML = `<option>❌ لا توجد بيانات مخزون</option>`;
+                }
+            } catch (err) {
+                console.error("Error loading inventory:", err);
+                matchedInventorySelect.innerHTML = `<option>⚠️ خطأ أثناء تحميل المخزون</option>`;
+            }
+        }
+
+        // 💾 حفظ التعديلات
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const itemData = {
+                product_name: document.getElementById("product_name").value,
+                matched_inventory: matchedInventorySelect.value,
+                quantity: parseFloat(document.getElementById("quantity").value) || 0,
+                unit_price: parseFloat(document.getElementById("unit_price").value) || 0,
+                category: document.getElementById("category").value
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/invoices/invoices/${invoiceId}/items/${itemId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(itemData)
+                });
+                const data = await res.json();
+
+                if (data.status === "success") {
+                    alert("✅ تم تعديل الصنف بنجاح");
+                    window.close();
+                } else {
+                    alert("❌ فشل التعديل: " + (data.message || "حدث خطأ"));
+                }
+            } catch (err) {
+                console.error("Error updating item:", err);
+                alert("⚠️ حدث خطأ أثناء حفظ التعديل");
+            }
+        });
+
+        // 🚀 بدء التنفيذ
+        loadItemData();
+    </script>
+</body>
+
+</html>

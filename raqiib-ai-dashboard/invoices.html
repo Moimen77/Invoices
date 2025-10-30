@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 الفواتير - Raqiib AI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/invoices.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">📊 Raqiib AI</div>
+        <ul>
+            <li><a href="invoices.html" class="active">📄 رفع الفواتير</a></li>
+            <li><a href="previous_invoices.html">📜 الفواتير السابقة</a></li>
+            <li><a href="clients.html">👥 العملاء</a></li>
+            <li><a href="stock.html">📦 المخزون</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2>📄 رفع وتحليل الفواتير</h2>
+
+        <div class="input-group">
+            <label>اختيار العميل</label>
+            <select id="client_select"></select>
+        </div>
+
+        <div class="input-group">
+            <label>اختر ملفات الفواتير</label>
+            <input type="file" id="invoice_files" multiple accept=".pdf,.jpg,.jpeg,.png">
+        </div>
+
+        <button id="upload_btn" type="button">📤 رفع وتحليل الفواتير</button>
+        <div id="progress_container" class="progress-container" style="display:none;">
+            <div id="progress_bar" class="progress-bar"></div>
+            <p id="progress_text" class="progress-text">0%</p>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <script src="api/config.js"></script>
+    <script src="assets/js/invoices.js"></script>
+</body>
+
+</html>

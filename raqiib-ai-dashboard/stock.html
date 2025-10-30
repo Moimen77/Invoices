@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 المخزون - Raqiib AI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <style>
+        .form-container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+        }
+
+        .filters-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filters-container label {
+            font-weight: 600;
+        }
+
+        .filters-container select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            min-width: 250px;
+            font-size: 15px;
+        }
+
+        #inventory_search {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #d1d5db;
+            font-size: 15px;
+            min-width: 250px;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .keyword-tag {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin: 2px;
+            display: inline-block;
+        }
+
+        .keyword-input {
+            border: 1px solid #ccc;
+            padding: 5px;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+
+        .add-keyword-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-keyword-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">📊 Raqiib AI</div>
+        <ul>
+            <li><a href="invoices.html">📄 رفع الفواتير</a></li>
+            <li><a href="previous_invoices.html">📜 الفواتير السابقة</a></li>
+            <li><a href="clients.html">👥 العملاء</a></li>
+            <li><a href="stock.html" class="active">📦 المخزون</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <!-- 🔍 فلاتر -->
+        <div class="filters-container">
+            <label for="client_filter">اختر العميل:</label>
+            <select id="client_filter">
+                <option value="">-- الرجاء اختيار عميل --</option>
+            </select>
+        </div>
+
+        <!-- ➕ نموذج إضافة صنف جديد -->
+        <div class="form-container" id="addInventoryFormContainer" style="display: none;">
+            <h2>➕ إضافة صنف مخزون جديد</h2>
+            <form id="addInventoryForm">
+                <div class="input-group">
+                    <label for="item_name">اسم الصنف:</label>
+                    <input type="text" id="item_name" required>
+                </div>
+                <div class="input-group">
+                    <label for="unit_of_measure">وحدة القياس:</label>
+                    <input type="text" id="unit_of_measure" required>
+                </div>
+                <div class="input-group">
+                    <label for="min_unit">أصغر وحدة:</label>
+                    <input type="text" id="min_unit" required>
+                </div>
+                <div class="input-group">
+                    <label for="unit_price">سعر الوحدة:</label>
+                    <input type="number" id="unit_price" step="0.01" required>
+                </div>
+                <button type="submit">💾 حفظ الصنف</button>
+            </form>
+        </div>
+
+
+        <!-- 📦 جدول المخزون -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2>📦 قائمة أصناف المخزون</h2>
+                <input type="text" id="inventory_search" placeholder="🔍 ابحث عن صنف..." style="display: none;">
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم الصنف</th>
+                        <th>وحدة القياس</th>
+                        <th>أصغر وحدة</th>
+                        <th>سعر الوحدة</th>
+                        <th>الكلمات المفتاحية</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center;">الرجاء اختيار عميل لعرض مخزونه.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+        const clientFilter = document.getElementById("client_filter");
+        const tableBody = document.getElementById("inventoryTableBody");
+        const addInventoryFormContainer = document.getElementById("addInventoryFormContainer");
+        const searchInput = document.getElementById("inventory_search");
+        let currentInventory = []; // لتخزين قائمة المخزون الحالية
+
+        // 🟢 تحميل العملاء في القائمة المنسدلة
+        async function loadClients() {
+            const res = await fetch(`${API_BASE}/clients/get_clients`);
+            const result = await res.json();
+            if (result.status === "success") {
+                clientFilter.innerHTML += result.data.map(c => `<option value="${c.client_id}">${c.client_name}</option>`).join("");
+            }
+        }
+
+        // 🎨 دالة جديدة لرسم الجدول بناءً على البيانات
+        function renderInventory(items) {
+            if (items.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">⚠️ لا توجد نتائج مطابقة للبحث.</td></tr>`;
+                return;
+            }
+            tableBody.innerHTML = items.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.item_name}</td>
+                    <td>${item.unit_of_measure}</td>
+                    <td>${item.Min_Unit}</td>
+                    <td>${item.unit_price}</td>
+                    <td>
+                        ${item.keywords.map(kw => `<span class="keyword-tag">${kw}</span>`).join('')}
+                        <div style="margin-top: 5px;">
+                            <input type="text" class="keyword-input" id="keyword-input-${item.id}" placeholder="أضف كلمة مفتاحية...">
+                            <button class="add-keyword-btn" onclick="addKeyword(${clientFilter.value}, ${item.id})">إضافة</button>
+                        </div>
+                    </td>
+                </tr>`).join("");
+        }
+
+        // 📦 تحميل المخزون
+        async function loadInventory(clientId) {
+            if (!clientId) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">الرجاء اختيار عميل لعرض مخزونه.</td></tr>`;
+                addInventoryFormContainer.style.display = "none";
+                searchInput.style.display = "none";
+                currentInventory = [];
+                return;
+            }
+            addInventoryFormContainer.style.display = "block";
+            searchInput.style.display = "inline-block";
+            searchInput.value = ""; // تفريغ البحث عند تغيير العميل
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">⏳ جاري تحميل المخزون...</td></tr>`;
+
+            try {
+                const res = await fetch(`${API_BASE}/invoices/inventory/client/${clientId}`);
+                const result = await res.json();
+
+                currentInventory = (result.status === "success" && result.data.length > 0) ? result.data : [];
+
+                if (currentInventory.length > 0) {
+                    renderInventory(currentInventory);
+                } else {
+                    currentInventory = [];
+                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">⚠️ لا يوجد مخزون لهذا العميل.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Error loading inventory:", err);
+                currentInventory = [];
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align: center;">❌ خطأ في تحميل المخزون.</td></tr>`;
+            }
+        }
+
+        // 📦 تحميل المخزون عند تغيير العميل
+        clientFilter.addEventListener("change", async () => {
+            const clientId = clientFilter.value;
+            await loadInventory(clientId);
+        });
+
+        // 🔍 البحث في المخزون
+        searchInput.addEventListener("input", () => {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const filteredItems = currentInventory.filter(item =>
+                item.item_name.toLowerCase().includes(searchTerm)
+            );
+            renderInventory(filteredItems);
+        });
+
+        // 💾 إضافة صنف مخزون جديد
+        document.getElementById("addInventoryForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const clientId = clientFilter.value;
+            if (!clientId) {
+                alert("الرجاء اختيار عميل أولاً.");
+                return;
+            }
+
+            const payload = {
+                client_id: parseInt(clientId),
+                item_name: document.getElementById("item_name").value,
+                unit_of_measure: document.getElementById("unit_of_measure").value,
+                min_unit: document.getElementById("min_unit").value,
+                unit_price: parseFloat(document.getElementById("unit_price").value)
+            };
+
+            const res = await fetch(`${API_BASE}/inventory/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+                alert("✅ تم إضافة الصنف بنجاح!");
+                document.getElementById("addInventoryForm").reset();
+                await loadInventory(clientId); // إعادة تحميل القائمة
+            } else {
+                alert("❌ فشلت الإضافة.");
+            }
+        });
+
+        // 🔑 إضافة كلمة مفتاحية
+        async function addKeyword(clientId, itemId) {
+            const input = document.getElementById(`keyword-input-${itemId}`);
+            const keyword = input.value.trim();
+            if (!keyword) return;
+            await fetch(`${API_BASE}/keywords/add`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ client_id: clientId, item_id: itemId, keyword: keyword })
+            });
+            input.value = "";
+            await loadInventory(clientId); // إعادة تحميل القائمة لإظهار الكلمة الجديدة
+        }
+
+        // 🚀 بدء تحميل العملاء عند فتح الصفحة
+        document.addEventListener("DOMContentLoaded", loadClients);
+    </script>
+</body>
+
+</html>

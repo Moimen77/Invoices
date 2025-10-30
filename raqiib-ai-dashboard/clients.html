@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 العملاء - Raqiib AI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <style>
+        .form-container {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo">📊 Raqiib AI</div>
+        <ul>
+            <li><a href="invoices.html">📄 رفع الفواتير</a></li>
+            <li><a href="previous_invoices.html">📜 الفواتير السابقة</a></li>
+            <li><a href="clients.html" class="active">👥 العملاء</a></li>
+            <li><a href="stock.html">📦 المخزون</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <!-- ➕ نموذج إضافة عميل جديد -->
+        <div class="form-container">
+            <h2>➕ إضافة عميل جديد</h2>
+            <form id="addClientForm">
+                <div class="input-group">
+                    <label for="client_name">اسم العميل:</label>
+                    <input type="text" id="client_name" required>
+                </div>
+                <div class="input-group">
+                    <label for="username">اسم المستخدم:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">كلمة المرور:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit">💾 حفظ العميل</button>
+            </form>
+        </div>
+
+        <!-- 📋 جدول عرض العملاء -->
+        <div class="table-container">
+            <h2>📋 قائمة العملاء</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم العميل</th>
+                        <th>اسم المستخدم</th>
+                        <th>تاريخ الإنشاء</th>
+                    </tr>
+                </thead>
+                <tbody id="clientsTableBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center;">⏳ جاري تحميل العملاء...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://127.0.0.1:8000";
+
+        // 🟢 تحميل وعرض العملاء
+        async function loadClients() {
+            const tableBody = document.getElementById("clientsTableBody");
+            try {
+                const res = await fetch(`${API_BASE}/clients/get_clients`);
+                const result = await res.json();
+
+                if (result.status === "success" && result.data.length > 0) {
+                    tableBody.innerHTML = result.data.map(client => `
+                        <tr>
+                            <td>${client.client_id}</td>
+                            <td>${client.client_name}</td>
+                            <td>${client.username}</td>
+                            <td>${new Date(client.created_at).toLocaleDateString('ar-EG')}</td>
+                        </tr>
+                    `).join("");
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center;">⚠️ لا يوجد عملاء لعرضهم.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Error loading clients:", err);
+                tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center;">❌ حدث خطأ أثناء تحميل البيانات.</td></tr>`;
+            }
+        }
+
+        // 💾 إضافة عميل جديد
+        document.getElementById("addClientForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const clientName = document.getElementById("client_name").value;
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const res = await fetch(`${API_BASE}/clients/add`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ client_name: clientName, username, password })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    alert("✅ تم إضافة العميل بنجاح!");
+                    document.getElementById("addClientForm").reset(); // تفريغ الفورم
+                    await loadClients(); // إعادة تحميل القائمة
+                } else {
+                    alert("❌ فشلت الإضافة: " + (data.detail || "خطأ غير معروف"));
+                }
+            } catch (err) {
+                console.error("Error adding client:", err);
+                alert("⚠️ حدث خطأ أثناء الاتصال بالسيرفر.");
+            }
+        });
+
+        // 🚀 بدء تحميل البيانات عند فتح الصفحة
+        document.addEventListener("DOMContentLoaded", loadClients);
+    </script>
+</body>
+
+</html>

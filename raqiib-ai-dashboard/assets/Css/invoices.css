@@ -1,0 +1,285 @@
+/* ✅ تنسيق عام للمحتوى داخل صفحة الفواتير */
+.content {
+    margin-right: 250px;
+    padding: 40px;
+    width: calc(100% - 250px);
+    background-color: #f4f6fb;
+    min-height: 100vh;
+}
+
+/* عنوان الصفحة */
+.content h2 {
+    color: #3f51b5;
+    font-size: 24px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+/* مربعات الإدخال */
+.input-group {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    margin-bottom: 25px;
+    transition: 0.2s ease;
+}
+
+.input-group:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+select,
+input[type="file"] {
+    width: 95%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+    background-color: #fafafa;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+select:focus,
+input[type="file"]:focus {
+    border-color: #3f51b5;
+    background: #fff;
+    outline: none;
+}
+
+/* زر التحميل */
+button#upload_btn {
+    background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 17px;
+    font-weight: bold;
+    width: 100%;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+
+button#upload_btn:hover {
+    background: linear-gradient(90deg, #2c3e9d, #3f51b5);
+    transform: translateY(-2px);
+}
+
+button#upload_btn:active {
+    transform: scale(0.98);
+}
+
+/* النتائج */
+.results {
+    margin-top: 30px;
+}
+
+/* البطاقة */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+    margin-bottom: 15px;
+    border-right: 5px solid #3f51b5;
+    transition: 0.2s ease;
+}
+
+.card:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.card img {
+    width: 140px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    margin-top: 10px;
+}
+
+/* الحالات */
+.status-success {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.status-error {
+    color: #c62828;
+    font-weight: bold;
+}
+
+.loading {
+    color: #555;
+    text-align: center;
+    background: #fff3cd;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ffeeba;
+}
+
+.results {
+    margin-top: 20px;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+}
+
+.results img {
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+}
+
+.results img:hover {
+    transform: scale(1.05);
+}
+
+.loading {
+    color: #444;
+    text-align: center;
+    padding: 10px;
+}
+
+.log-line {
+    font-family: monospace;
+    background: #f9f9f9;
+    border-bottom: 1px dashed #ddd;
+    padding: 6px 8px;
+    margin: 0;
+    direction: ltr;
+}
+
+.progress-container {
+    width: 100%;
+    background: #e9ecef;
+    border-radius: 15px;
+    height: 50px;
+    margin: 20px 0;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.15);
+    overflow: visible;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+    transition: width 0.4s ease-in-out;
+    border-radius: 15px 15px 15px 15px;
+}
+
+.progress-text {
+    position: absolute;
+    top: 20%;
+    /* 🔹 منتصف الشريط */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* ✅ ضبط أفقي + رأسي */
+    color: #fff;
+    font-weight: bold;
+    font-size: 15px;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 160px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.filters button {
+    background: linear-gradient(90deg, #3f51b5, #5c6bc0);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    align-self: flex-end;
+    transition: background 0.3s;
+}
+
+.filters button:hover {
+    background: linear-gradient(90deg, #2c3e9d, #3f51b5);
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.invoice-table th,
+.invoice-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    font-size: 14px;
+}
+
+.invoice-table th {
+    background: #3f51b5;
+    color: #fff;
+    font-weight: bold;
+}
+
+.invoice-table tr:hover {
+    background: #f5f6ff;
+}
+
+.invoice-table td a {
+    text-decoration: none;
+    color: #2196f3;
+    font-weight: bold;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.filters .btn {
+    white-space: nowrap;
+}

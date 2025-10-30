@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📜 الفواتير السابقة - Raqiib AI</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/sidebar.css">
+    <link rel="stylesheet" href="assets/css/invoices.css">
+
+    <style>
+        /* 💄 تحسين شكل الأزرار داخل الجدول */
+        .action-btn {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 0 2px;
+            transition: 0.2s;
+        }
+
+        /* ✅ الحاوية الخارجية للجدول */
+        .table-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-top: 20px;
+        }
+
+        /* ✅ الجدول نفسه */
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+            /* يقلل العرض الإجباري */
+        }
+
+        th,
+        td {
+            border: 1px solid #e5e5e5;
+            padding: 10px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        /* ✅ الأعمدة اللي مش عايزينها تتكسر */
+        .no-wrap,
+        th:nth-child(4),
+        th:nth-child(6),
+        th:nth-child(7),
+        td:nth-child(4),
+        td:nth-child(6),
+        td:nth-child(7) {
+            white-space: nowrap;
+        }
+
+        /* ✅ تحسين شكل الرابط */
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 🎨 ألوان الأزرار */
+        .view-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .edit-btn {
+            background-color: #f1c40f;
+            color: black;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* 🧾 تحسين شكل الجدول */
+        .invoice-table thead th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .invoice-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .invoice-table tbody tr:hover {
+            background-color: #eef6ff;
+        }
+
+        /* ✅ للجوال */
+        @media (max-width: 768px) {
+
+            th,
+            td {
+                font-size: 12px;
+                padding: 6px;
+            }
+
+            .action-btn {
+                font-size: 12px;
+                padding: 4px 6px;
+            }
+
+            .table-container {
+                border-radius: 6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div class="logo">📊 Raqiib AI</div>
+        <ul>
+            <li><a href="invoices.html">📤 رفع الفواتير</a></li>
+            <li><a href="clients.html">👥 العملاء</a></li>
+            <li><a href="stock.html">📦 المخزون</a></li>
+            <li><a href="previous_invoices.html" class="active">📜 الفواتير السابقة</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2>📜 الفواتير السابقة</h2>
+
+        <!-- 🟢 فلاتر البحث -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>اختر العميل</label>
+                <select id="client_filter"></select>
+            </div>
+
+            <div class="filter-group">
+                <label>من تاريخ</label>
+                <input type="date" id="date_from">
+            </div>
+
+            <div class="filter-group">
+                <label>إلى تاريخ</label>
+                <input type="date" id="date_to">
+            </div>
+            <button id="download_excel" class="btn btn-success">⬇️ تحميل Excel</button>
+            <button id="filter_btn">🔍 بحث</button>
+        </div>
+
+        <!-- 🟡 جدول الفواتير -->
+        <div class="table-container">
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم المورد</th>
+                        <th>رقم الفاتورة</th>
+                        <th>التاريخ</th>
+                        <th>إجمالي المبلغ</th>
+                        <th>صورة الفاتورة</th>
+                        <th>عرض الأصناف</th>
+                        <th>الأجرائات</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice_table_body">
+                    <tr>
+                        <td colspan="8" style="text-align:center;">⏳ جاري تحميل البيانات...</td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+    </div>
+
+    <script src="api/config.js"></script>
+    <script src="assets/js/previous_invoices.js"></script>
+</body>
+
+</html>

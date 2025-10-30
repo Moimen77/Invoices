@@ -35,10 +35,10 @@ def parse_invoice_from_image(image_path: str):
     - غير ذلك → أخرى
 - نفس بنية JSON التالية بدقة:
 {
-  "invoice_details": {"invoice_number": "string","issue_date": "string","issue_time": "string"},
+  "invoice_details": {"invoice_number": "string","issue_date": "dd-mm-yyyy","issue_time": "string"},
   "supplier_details": {"name": "string","vat_id": "string","address": "string"},
   "client_details": {"name": "string","account_number": "string","type": "string","address": "string","vat_id": "string"},
-  "product_details": [{"product_name": "string","alt_name": "string","quantity": 0,"unit_of_measure": "string",
+  "products": [{"product_name": "string","alt_name": "string","quantity": 0,"unit_of_measure": "string",
   "unit_price": 0.0,"total_before_discount": 0.0,"discount_amount": 0.0,"total_after_discount": 0.0,
   "vat_percentage": 0.0,"vat_amount": 0.0,"final_total_per_product": 0.0,"category": "string"}],
   "invoice_summary": {"total_amount_before_vat": 0.0,"total_discount_amount": 0.0,"net_amount_before_vat": 0.0,
